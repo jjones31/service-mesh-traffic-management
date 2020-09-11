@@ -34,12 +34,12 @@ helm install delivery-service-v1 --set firstInstall=true --set baseOpenshiftAppH
 
 #### Courie Web App
 ```
-helm install delivery-service-v1 --set firstInstall=true --set directionsApiKey=$API_KEY --set baseOpenshiftAppHostname=$CLUSTER_APP_BASE courie-web
+helm install courie-web-v1 --set firstInstall=true --set directionsApiKey=$API_KEY --set baseOpenshiftAppHostname=$CLUSTER_APP_BASE courie-web
 ```
 
 #### Courie Driver Web App
 ```
-helm install delivery-service-v1 --set firstInstall=true --set directionsApiKey=$API_KEY --set baseOpenshiftAppHostname=$CLUSTER_APP_BASE courie-driver-web
+helm install courie-driver-web-v1 --set firstInstall=true --set directionsApiKey=$API_KEY --set baseOpenshiftAppHostname=$CLUSTER_APP_BASE courie-driver-web
 ```
 
 ##### Deploying a new app version
@@ -48,7 +48,7 @@ To deploy another version of an app, you must set version, versionName, and dock
 The following example deploys version 2 of the courie-web application.
 
 ```
-helm install delivery-service-v2 --set version=2.0.0 --set versionName=v2 --dockerTag=2.0.0 courie-web
+helm install courie-web-v2 --set version=2.0.0 --set versionName=v2 --dockerTag=2.0.0 courie-web
 ```
 
 Once the deployments are finished, you can find the routes to all of Courie's services with:
