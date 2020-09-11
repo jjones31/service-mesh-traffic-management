@@ -1,0 +1,6 @@
+apiVersion: v2
+name: courie-driver-service
+description: Installs the the driver service for Courie, the on-demand delivery app. 
+type: application
+version: 1.0.0
+appVersion: 1.0.0

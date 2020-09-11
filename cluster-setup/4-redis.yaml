@@ -1,0 +1,87 @@
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: redis
+  namespace: courie-data
+  labels:
+    app: redis
+spec:
+  tags:
+    - name: 5.0.6
+      from:
+        kind: DockerImage
+        name: 'redis:5.0.6'
+      generation: 2
+      referencePolicy:
+        type: Source
+
+---
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: redis
+  namespace: courie-data
+  labels:
+    app: redis
+spec:
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - redis
+        from:
+          kind: ImageStreamTag
+          namespace: courie-data
+          name: 'redis:5.0.6'
+  replicas: 1
+  selector:
+    deploymentconfig: redis
+  template:
+    metadata:
+      labels:
+        deploymentconfig: redis
+    spec:
+      volumes:
+        - name: redis-volume-1
+          emptyDir: {}
+      containers:
+        - name: redis
+          image: redis:5.0.6
+          ports:
+            - containerPort: 6379
+              protocol: TCP
+          volumeMounts:
+            - name: redis-volume-1
+              mountPath: /data
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis
+  namespace: courie-data
+  labels:
+    app: redis
+spec:
+  ports:
+    - name: 6379-tcp
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+  selector:
+    deploymentconfig: redis
+  type: ClusterIP

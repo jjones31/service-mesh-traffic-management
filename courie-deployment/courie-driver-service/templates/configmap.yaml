@@ -1,0 +1,16 @@
+{{- if .Values.firstInstall -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  # ConfigMap is referenced by the deployment and is expected to be driver-service.
+  name: driver-service
+  labels:
+    app: driver-service
+data:
+  # These values are known from the cluster-setup resources.
+  BOOTSTRAP_SERVERS: 'courie-kafka-cluster-kafka-bootstrap.amq-clusters:9092'
+  DELIVERY_SERVICE_HOST: 'http://delivery-service:8080'
+  DIRECTIONS_API_KEY: {{ .Values.directionsApiKey }}
+  QUARKUS_HTTP_PORT: '8080'
+  REDIS_SERVER: 'redis.courie-data:6379'
+{{- end }}

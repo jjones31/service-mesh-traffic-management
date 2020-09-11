@@ -1,0 +1,37 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: courie-web-canary-template
+metadata:
+  name: courie-web-canary-template
+objects:
+- apiVersion: networking.istio.io/v1alpha3
+  kind: VirtualService
+  metadata:
+    # Must be the same name as the VS from Courie Helm install.
+    name: courie-web-routing-config
+  spec:
+    hosts:
+    - "courie-web.${CLUSTER_APPS_BASE_URL}"
+    gateways:
+    - courie-web-gateway
+    http:
+    - match:
+      - headers:
+          X-Version:
+            exact: '2.0.0'
+      route:
+      - destination:
+          host: courie-web
+          subset: v2
+    - route:
+      - destination:
+          host: courie-web
+          subset: v1
+
+parameters:
+- description: The base app URL of your OpenShift Cluster. For example, apps.cluster.example.com
+  displayName: App Cluster URL
+  name: CLUSTER_APPS_BASE_URL
+  required: true

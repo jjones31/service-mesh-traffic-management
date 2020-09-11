@@ -1,0 +1,12 @@
+{{- if .Values.firstInstall -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: driver-service-dr
+spec:
+  host: driver-service
+  subsets:
+  - name: {{ .Values.versionName }}
+    labels:
+      version: {{ .Values.version }}
+{{- end }}
