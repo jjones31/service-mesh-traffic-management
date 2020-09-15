@@ -16,6 +16,11 @@ Welcome to the Service Mesh Application Development labs. Today we are going to 
 Open [https://labs.opentlc.com/](https://labs.opentlc.com/) in your browser of choice and sign in with your OpenTLC username.   
 _Your username is your Red Hat email with a dash in place of the @._   
 <!-- ![login](login.png) -->
-After signing in, click *Services* -> *Catalogs* then select *OPENTLC OpenShift 4 Labs*, then select *OpenShift 4 Service Mesh Lab*, and finally click *Order*.   
+1. Sign in
+2. Click *Services*
+3. Click *Catalogs*
+4. Click *OPENTLC OpenShift 4 Labs*
+5. Click *OpenShift 4 Service Mesh Lab*
+6. Click *Order*.   
 ![catalogs](catalogs.png)   
 ![smlab](smlab.png)
