@@ -65,5 +65,5 @@ Running this template will update the VirtualService to distribute traffic to v1
 
 Apply the scenario with the following: 
 ```
-oc apply -f 1-courie-web-canary.yaml -p CLUSTER_APPS_BASE_URL=$CLUSTER_APP_BASE | oc apply -f -
+oc process -f 1-courie-web-canary.yaml -p CLUSTER_APPS_BASE_URL=$CLUSTER_APP_BASE | oc apply -f -
 ```
