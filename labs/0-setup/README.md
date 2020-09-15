@@ -1,4 +1,5 @@
-# Provision and Setup Serverless Environment  
+# Provision and Setup Service Mesh Environment  
+_Welcome to the Service Mesh Lab. Today we are going to get our environments setup by provisioning a OpenShift 4 Cluster and setting the necessary components of Service Mesh. In future labs we will deploy Courie, an application consisting of Microservices that we will use to implement Service Mesh._   
 
 >Updated and verified on September 15, 2020
 >- Provision OpenShift Service Mesh Lab in OpenTLC
