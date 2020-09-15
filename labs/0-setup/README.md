@@ -24,3 +24,20 @@ _Your username is your Red Hat email with a dash in place of the @._
 6. Click *Order*.   
 ![catalogs](catalogs.png)   
 ![smlab](smlab.png)
+
+## Setup Projects
+Clone the Service Mesh Traffic Management lab and CD into the `service-mesh-traffic-management` directory.
+```
+git clone https://github.com/jjones31/service-mesh-traffic-management
+
+
+cd service-mesh-traffic-management
+```   
+Create an environmental variable for `LAB_HOME` and then go into the cluster-setup directory and apply the `0-projects.yaml` to create the projects on your cluster.
+```
+LAB_HOME=$(pwd)
+
+cd $LAB_HOME/cluster-setup
+
+oc apply -f 0-projects.yml
+```
