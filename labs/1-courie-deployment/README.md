@@ -1,15 +1,14 @@
-# Provision and Setup Service Mesh Environment  
-_Welcome to the Service Mesh Enablement. In this lab, we are going to setup our environment by provisioning a OpenShift 4 Cluster and installing the necessary components of the Service Mesh._   
+# Deploy Courie 
+_Welcome  back to the Service Mesh Lab. In this section of the lab we are going to deploy Courie. Courie consists of two sub applications, Courie Driver and Courie Web. In the Courie Driver application drivers will receive notifications to pick up packages and deliver them to designated locations. In the Courie Web application. users select destinations for packages to be delivered and a driver comes to pick up the package and deliver it._   
 
-> Steps to setup Service Mesh Environment
->- Provision OpenShift Service Mesh Lab in OpenTLC
->- Setup the projects   
->- Install the operators 
->- Deploy the Service Mesh Control Plane and ServiceMeshMemberRoll in istio-system namespace 
->- Install AMQ Streams (Kafka) resources in amq-clusters namespace
->- Install Redis service in courie-data namespace
->- Install resources for Courie CICD Pipeline
+>Steps for deploying Courie
+>- Deploy Courie Delivery Service
+>- Deploy Courie Driver Service
+>- Deploy Courie Driver Web
+>- Deploy Courie Web Application
 
+
+Welcome to the Service Mesh Application Development labs. Today we are going to walk you through how to get your environment set up and ready to perform service mesh related tasks in future labs. In the first section of this lab will start by show you how to order your lab environment from OpenTLC labs.
 
 ## Provision OpenShift Service Mesh Lab in OpenTLC
 Open [https://labs.opentlc.com/](https://labs.opentlc.com/) in your browser of choice and sign in with your OpenTLC username.   
@@ -23,8 +22,6 @@ _Your username is your Red Hat email with a dash in place of the @._
 6. Click *Order*.   
 ![catalogs](catalogs.png)   
 ![smlab](smlab.png)
-7. Sign into the cluster with ssh.
-![ssh](ssh.png)
 
 ## Setup Projects
 Clone the Service Mesh Traffic Management lab and CD into the `service-mesh-traffic-management` directory.
@@ -40,17 +37,17 @@ LAB_HOME=$(pwd)
 
 cd $LAB_HOME/cluster-setup
 
-oc apply -f 0-projects.yaml
+oc apply -f 0-projects.yml
 ```
 
 ## Setup Operator Subscriptions
-Install the operator subscriptions and wait for them to become available before moving on.  
+Install the operator subscriptions and wait for them to become available before moving on.   
 ```
 oc apply -f 1-operator-install.yaml
 
-kubectl wait --for=condition=Ready pod --all --timeout=-1s -n openshift-operators
+kubectl wait subscription --all --timeout=-1s --for=condition=Available -n openshift-operators
 
-kubectl wait --for=condition=Ready pod --all --timeout=-1s -n courie-pipeline
+kubectl wait subscription --all --timeout=-1s --for=condition=Available -n courie-pipeline
 
 ```
 
