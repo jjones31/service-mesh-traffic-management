@@ -48,7 +48,7 @@ To deploy another version of an app, you must set version, versionName, and dock
 The following example deploys version 2 of the courie-web application.
 
 ```
-helm install courie-web-v2 --set version=2.0.0 --set versionName=v2 --dockerTag=2.0.0 courie-web
+helm install courie-web-v2 --set version=2.0.0 --set versionName=v2 --set dockerTag=2.0.0 courie-web
 ```
 
 Once the deployments are finished, you can find the routes to all of Courie's services with:
