@@ -7,6 +7,11 @@ metadata:
 spec:
   version: v1.1
   istio:
+    global:
+      # Enable mTLS
+      controlPlaneSecurityEnabled: true
+      mtls:
+        enabled: true
     gateways:
       istio-egressgateway:
         autoscaleEnabled: false
