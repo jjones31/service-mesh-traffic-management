@@ -9,9 +9,9 @@ spec:
   istio:
     global:
       # Enable mTLS
-      controlPlaneSecurityEnabled: true
+      controlPlaneSecurityEnabled: false
       mtls:
-        enabled: true
+        enabled: false
     gateways:
       istio-egressgateway:
         autoscaleEnabled: false
