@@ -27,6 +27,19 @@ objects:
           subset: v2
         weight: 50
 
+- kind: DestinationRule
+  metadata:
+    name: courie-web-dr
+  spec:
+    host: courie-web
+    subsets:
+    - name: v1
+      labels:
+        version: 1.0.0
+    - name: v2
+      labels:
+        version: 2.0.0
+
 parameters:
 - description: The base app URL of your OpenShift Cluster. For example, apps.cluster.example.com
   displayName: App Cluster URL
