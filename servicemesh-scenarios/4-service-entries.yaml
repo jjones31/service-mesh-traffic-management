@@ -1,0 +1,42 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: google-maps-api-ext
+spec:
+  hosts:
+  - maps.googleapis.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: courie-kafka-cluster-kafka-bootstrap.amq-clusters-ext
+spec:
+  hosts:
+  - courie-kafka-cluster-kafka-bootstrap.amq-clusters
+  ports:
+  - number: 9092
+    name: kafka-tcp
+    protocol: TCP
+  location: MESH_EXTERNAL
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: redis.courie-data-ext
+spec:
+  hosts:
+  - redis.courie-data
+  ports:
+  - number: 6379
+    name: redis-tcp
+    protocol: TCP
+  resolution: DNS
+  location: MESH_EXTERNAL

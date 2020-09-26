@@ -2,20 +2,19 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
-  template: courie-web-canary-template
+  template: delivery-service-cb-template
 metadata:
-  name: courie-web-canary-template
+  name: delivery-service-cb-template
 objects:
 - apiVersion: networking.istio.io/v1alpha3
   kind: VirtualService
   metadata:
-    # Must be the same name as the VS from Courie Helm install.
-    name: courie-web-routing-config
+    name: delivery-service-routing-config
   spec:
     hosts:
-    - "courie-web.${CLUSTER_APPS_BASE_URL}"
+    - "delivery-api.${CLUSTER_APPS_BASE_URL}"
     gateways:
-    - courie-web-gateway
+    - delivery-service-gateway
     trafficPolicy:
       outlierDetection:
         consecutiveErrors: 1
@@ -23,22 +22,9 @@ objects:
         baseEjectionTime: 1m
         maxEjectionPercent: 100
     http:
-    - fault:
-        abort:
-          httpStatus: 500
-          percentage:
-            value: 10
-      match:
-      - headers:
-          X-Username:
-            exact: bobjones
-      route:
-      - destination:
-          host: courie-web
-          subset: v2
     - route:
       - destination:
-          host: courie-web
+          host: delivery-service
           subset: v1
 
 parameters:

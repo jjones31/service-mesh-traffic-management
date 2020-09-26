@@ -1,110 +1,189 @@
-apiVersion: jenkins.io/v1alpha2
-kind: Jenkins
-metadata:
-  generation: 1
-  name: courie-jenkins
-  namespace: courie-pipeline
-spec:
-  backup:
-    action: {}
-    containerName: ''
-    interval: 0
-    makeBackupBeforePodDeletion: false
-  configurationAsCode:
-    configurations: null
-    secret:
-      name: ''
-  groovyScripts:
-    configurations: null
-    secret:
-      name: ''
-  clusterRoles:
-    - apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: edit
-  master:
-    basePlugins:
-      - name: kubernetes
-        version: 1.18.3
-      - name: workflow-job
-        version: '2.34'
-      - name: workflow-aggregator
-        version: '2.6'
-      - name: git
-        version: 3.12.0
-      - name: job-dsl
-        version: '1.76'
-      - name: configuration-as-code
-        version: '1.29'
-      - name: configuration-as-code-support
-        version: '1.19'
-      - name: kubernetes-credentials-provider
-        version: 0.12.1
-    containers:
-      - command:
-          - /usr/bin/go-init
-          - '-main'
-          - /usr/libexec/s2i/run
-        env:
-          - name: OPENSHIFT_ENABLE_OAUTH
-            value: 'true'
-          - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
-            value: 'true'
-          - name: DISABLE_ADMINISTRATIVE_MONITORS
-            value: 'false'
-          - name: KUBERNETES_MASTER
-            value: 'https://kubernetes.default:443'
-          - name: KUBERNETES_TRUST_CERTIFICATES
-            value: 'true'
-          - name: JENKINS_SERVICE_NAME
-            value: jenkins-operator-http-example
-          - name: JNLP_SERVICE_NAME
-            value: jenkins-operator-slave-example
-          - name: JENKINS_UC_INSECURE
-            value: 'false'
-          - name: JENKINS_HOME
-            value: /var/lib/jenkins
-          - name: JAVA_OPTS
-            value: >-
-              -XX:+UnlockExperimentalVMOptions -XX:+UnlockExperimentalVMOptions
-              -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1
-              -Djenkins.install.runSetupWizard=false -Djava.awt.headless=true
-        image: 'quay.io/openshift/origin-jenkins:latest'
-        imagePullPolicy: Always
-        livenessProbe:
-          httpGet:
-            path: /login
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 420
-          periodSeconds: 360
-          timeoutSeconds: 240
-        name: jenkins-master
-        readinessProbe:
-          httpGet:
-            path: /login
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 3
-          periodSeconds: 0
-          timeoutSeconds: 240
-        resources:
-          limits:
-            cpu: 600m
-            memory: 4Gi
-          requests:
-            cpu: 500m
-            memory: 3Gi
-  restore:
-    action: {}
-    containerName: ''
-  service:
-    port: 8080
-    type: ClusterIP
-  slaveService:
-    port: 50000
-    type: ClusterIP
-  serviceAccount:
+apiVersion: v1
+items:
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
     annotations:
-      serviceaccounts.openshift.io/oauth-redirectreference.jenkins: >-
-        {"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"jenkins-example"}}
+      haproxy.router.openshift.io/timeout: 4m
+      template.openshift.io/expose-uri: http://{.spec.host}{.spec.path}
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+    namespace: courie-pipeline
+  spec:
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: jenkins
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+    namespace: courie-pipeline
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+    namespace: courie-pipeline
+  spec:
+    replicas: 1
+    selector:
+      name: jenkins
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: jenkins
+      spec:
+        containers:
+        - capabilities: {}
+          env:
+          - name: OPENSHIFT_ENABLE_OAUTH
+            value: "true"
+          - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+            value: "true"
+          - name: DISABLE_ADMINISTRATIVE_MONITORS
+            value: "false"
+          - name: KUBERNETES_MASTER
+            value: https://kubernetes.default:443
+          - name: KUBERNETES_TRUST_CERTIFICATES
+            value: "true"
+          - name: JENKINS_SERVICE_NAME
+            value: jenkins
+          - name: JNLP_SERVICE_NAME
+            value: jenkins-jnlp
+          - name: ENABLE_FATAL_ERROR_LOG_FILE
+            value: "false"
+          - name: JENKINS_UC_INSECURE
+            value: "false"
+          image: ' '
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 420
+            periodSeconds: 360
+            timeoutSeconds: 240
+          name: jenkins
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 3
+            timeoutSeconds: 240
+          resources:
+            limits:
+              memory: 1Gi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /var/lib/jenkins
+            name: jenkins-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        serviceAccountName: jenkins
+        volumes:
+        - name: jenkins-data
+          persistentVolumeClaim:
+            claimName: jenkins
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - jenkins
+        from:
+          kind: ImageStreamTag
+          name: jenkins:2
+          namespace: openshift
+        lastTriggeredImage: ""
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    annotations:
+      serviceaccounts.openshift.io/oauth-redirectreference.jenkins: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"jenkins"}}'
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+    namespace: courie-pipeline
+- apiVersion: authorization.openshift.io/v1
+  groupNames: null
+  kind: RoleBinding
+  metadata:
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins_edit
+  roleRef:
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: jenkins
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins-jnlp
+    namespace: courie-pipeline
+  spec:
+    ports:
+    - name: agent
+      nodePort: 0
+      port: 50000
+      protocol: TCP
+      targetPort: 50000
+    selector:
+      name: jenkins
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.openshift.io/dependencies: '[{"name": "jenkins-jnlp", "namespace":
+        "", "kind": "Service"}]'
+      service.openshift.io/infrastructure: "true"
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+    namespace: courie-pipeline
+  spec:
+    ports:
+    - name: web
+      nodePort: 0
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      name: jenkins
+    sessionAffinity: None
+    type: ClusterIP
+kind: List
+metadata: {}

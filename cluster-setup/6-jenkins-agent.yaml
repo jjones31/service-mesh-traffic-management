@@ -1,0 +1,123 @@
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: jenkins-slave-maven-centos7
+  namespace: courie-pipeline
+  labels:
+    build: jenkins-mvn-agent
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: v3.11
+      from:
+        kind: DockerImage
+        name: 'openshift/jenkins-slave-maven-centos7:v3.11'
+
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: jenkins-mvn-agent
+  namespace: courie-pipeline
+  labels:
+    build: jenkins-mvn-agent
+spec:
+  lookupPolicy:
+    local: false
+
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: jenkins-mvn-agent
+  namespace: courie-pipeline
+  labels:
+    build: jenkins-mvn-agent
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: jenkins-mvn-agent:latest
+  strategy:
+    type: Docker
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: 'jenkins-slave-maven-centos7:v3.11'
+  source:
+    type: Dockerfile
+    dockerfile: >-
+      FROM openshift/jenkins-slave-maven-centos7:v3.11
+
+      USER root
+
+      RUN yum install -y yum-utils && \
+          yum install -y uidmap iptables maven fuse-overlayfs skopeo buildah podman && yum clean all
+
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: jenkins-slave-nodejs-centos7
+  namespace: courie-pipeline
+  labels:
+    build: jenkins-node-agent
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: v3.11
+      from:
+        kind: DockerImage
+        name: 'openshift/jenkins-slave-nodejs-centos7:v3.11'
+
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: jenkins-nodejs-agent
+  namespace: courie-pipeline
+  labels:
+    build: jenkins-nodejs-agent
+spec:
+  lookupPolicy:
+    local: false
+
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: jenkins-nodejs-agent
+  namespace: courie-pipeline
+  labels:
+    build: jenkins-nodejs-agent
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: jenkins-nodejs-agent:latest
+  strategy:
+    type: Docker
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: 'jenkins-slave-nodejs-centos7:v3.11'
+  source:
+    type: Dockerfile
+    dockerfile: >-
+      FROM openshift/jenkins-slave-nodejs-centos7:v3.11
+
+      USER root
+
+      RUN yum install -y yum-utils && \
+          yum install -y uidmap iptables fuse-overlayfs skopeo buildah podman && yum clean all
+
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange

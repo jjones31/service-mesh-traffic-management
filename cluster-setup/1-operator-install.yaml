@@ -57,27 +57,5 @@ spec:
   channel: stable
   name: amq-streams
   source: redhat-operators 
-  sourceNamespace: openshift-marketplace 
-
----
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: courie-pipeline-og
-  namespace: courie-pipeline
-spec:
-  targetNamespaces:
-  - courie-pipeline
-
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: jenkins-operator
-  namespace: courie-pipeline
-spec:
-  channel: alpha
-  name: jenkins-operator
-  source: community-operators
-  sourceNamespace: openshift-marketplace 
+  sourceNamespace: openshift-marketplace
 
